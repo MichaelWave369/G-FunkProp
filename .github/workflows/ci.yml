@@ -22,12 +22,15 @@ jobs:
           node --check app.js
           node --check core.js
           node --check bench.js
+          node --check dsp.js
+          node --check tests/test-dsp.cjs
           node --check tests/test-bench.cjs
           node --check tests/test-core.cjs
       - name: Run model tests
         run: |
           node tests/test-core.cjs
           node tests/test-bench.cjs
+          node tests/test-dsp.cjs
       - name: Validate offline entrypoint references
         run: |
           test -f index.html
@@ -35,6 +38,7 @@ jobs:
           test -f app.js
           test -f core.js
           test -f bench.js
+          test -f dsp.js
           if grep -nE 'https?://|src="//|href="//' index.html; then
             echo 'Unexpected network reference in offline entrypoint'
             exit 1

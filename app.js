@@ -25,8 +25,8 @@
   let previousTime = 0;
   let currentCycle = core.computeCycle({active:false, powerW:25000, bassLevel:0, sensitivity:1, frequencyHz:42, tempC:24, propellantKg:100});
   let lastSweep = null;
-  let samples = new Float32Array(1024);
-  let spect = new Uint8Array(1024);
+  let samples = new Float32Array(32768);
+  let lastAnalysisTime = 0;
   const stars = Array.from({length:70}, (_, i) => ({x: pseudo(i * 19 + 7), y:pseudo(i * 37 + 9),r:0.4+pseudo(i*13+3)*1.1}));
 
   function pseudo(seed) { const x = Math.sin(seed * 87.231) * 9743.12; return x - Math.floor(x); }
@@ -72,7 +72,7 @@
     lowpass.frequency.value = 88;
     lowpass.Q.value = 0.7;
     analyser = ac.createAnalyser();
-    analyser.fftSize = 8192;
+    analyser.fftSize = 32768; // 0.68 s at 48 kHz; several cycles near the 12 Hz threshold
     analyser.smoothingTimeConstant = 0.55;
     monitor = ac.createGain();
     monitor.gain.value = Number($('volumeSlider').value)/100;
@@ -83,7 +83,6 @@
     silentSink.connect(ac.destination);
     monitor.connect(ac.destination);
     samples = new Float32Array(analyser.fftSize);
-    spect = new Uint8Array(analyser.frequencyBinCount);
   }
 
   function disconnectTone() {
@@ -164,32 +163,27 @@
     if (fileElement) fileElement.pause();
     inputLevel = 0;
     detectedHz = 0;
+    lastAnalysisTime=0;
     $('playBtn').innerHTML = '▶ <span>ENGAGE THE GROOVE</span>';
     displayMessage(message);
   }
 
-  function readAudio() {
-    if (!running || !analyser) { inputLevel = 0; detectedHz = 0; return; }
-    analyser.getFloatTimeDomainData(samples);
-    let sum = 0;
-    for (let i = 0; i < samples.length; i += 4) sum += samples[i] * samples[i];
-    const rms = Math.sqrt(sum / (samples.length / 4));
-    inputLevel = core.clamp(rms / 0.07, 0, 1);
-    if (source === 'tone') {
-      detectedHz = getFreq();
+  function readAudio(time) {
+    if (!running || !analyser) {
+      inputLevel=0;detectedHz=0;lastAnalysisTime=0;
+      $('dspStatus').textContent='IDLE';
       return;
     }
-    analyser.getByteFrequencyData(spect);
-    const binSize = ac.sampleRate / analyser.fftSize;
-    const begin = Math.max(1, Math.ceil(core.MIN_HZ/binSize));
-    const end = Math.min(spect.length-1, Math.floor(core.MAX_HZ/binSize));
-    let peak = 0;
-    let peakBin = 0;
-    for (let i=begin; i<=end; i++) {
-      if (spect[i] > peak) { peak=spect[i]; peakBin=i; }
-    }
-    detectedHz = peak > 15 && inputLevel > .01 ? peakBin * binSize : 0;
-    if (!detectedHz) inputLevel = 0;
+    // Pace the Goertzel spectrum sweep to ~10 Hz. It is more expensive than
+    // a built-in FFT and the 0.68 s signal window does not justify 60 reads/s.
+    if(lastAnalysisTime && time-lastAnalysisTime<100)return;
+    lastAnalysisTime=time;
+    analyser.getFloatTimeDomainData(samples);
+    const result=globalThis.GBIOSDSP.analyze(samples,ac.sampleRate);
+    inputLevel=result.level;
+    detectedHz=result.frequencyHz;
+    const confidence=Math.round(100*result.confidence);
+    $('dspStatus').textContent=result.detected?'LOCKED / '+confidence+'%':'NO LOCK / '+result.reason.toUpperCase();
   }
 
   function setSliderOutputs() {
@@ -221,7 +215,7 @@
     $('thrustMeter').style.width = Math.min(100, c.thrustN/3.1*100) + '%';
     $('powerMeter').style.width = Math.min(100, c.busDrawW/50000*100) + '%';
     $('speedMeter').style.width = Math.min(100, flight.speedMS/0.1*100) + '%';
-    $('peakHz').textContent = 'FUNDAMENTAL: ' + (detectedHz ? detectedHz.toFixed(1) : '--') + ' HZ';
+    $('peakHz').textContent = 'DOMINANT: ' + (detectedHz ? detectedHz.toFixed(1) : '--') + ' HZ';
     $('tempValue').textContent = flight.tempC.toFixed(1) + ' °C';
     $('piezoValue').textContent = c.recoveredW.toFixed(0) + ' W';
     $('fuelValue').textContent = flight.propellantKg.toFixed(3) + ' kg';
@@ -403,7 +397,7 @@
   function frame(time) {
     const dt=previousTime ? Math.min(.1,Math.max(0,(time-previousTime)/1000)) : 0;
     previousTime=time;
-    readAudio();
+    readAudio(time);
     currentCycle=core.computeCycle({active:running,fault:flight.fault,powerW:getPower(),bassLevel:inputLevel,sensitivity:getSensitivity(),frequencyHz:detectedHz,tempC:flight.tempC,propellantKg:flight.propellantKg});
     if(running){
       flight=core.advanceState(flight,currentCycle,dt);

@@ -7,6 +7,7 @@ on:
       - index.html
       - styles.css
       - core.js
+      - bench.js
       - app.js
       - .github/workflows/pages.yml
   workflow_dispatch:

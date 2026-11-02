@@ -1,0 +1,70 @@
+name: Publish G-BIOS to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - styles.css
+      - core.js
+      - app.js
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: gbios-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Validate and publish flight deck
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out G-BIOS
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate engineering model and source
+        run: |
+          node --check core.js
+          node --check app.js
+          node tests/test-core.cjs
+
+      - name: Stage only the public, dependency-free simulator
+        run: |
+          mkdir -p _site
+          cp index.html styles.css core.js app.js _site/
+          test -s _site/index.html
+          test -s _site/styles.css
+          test -s _site/core.js
+          test -s _site/app.js
+          if grep -nE 'https?://|src="//|href="//' _site/index.html; then
+            echo 'Unexpected network URL in the offline HTML entrypoint'
+            exit 1
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload public site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy public site
+        id: deployment
+        uses: actions/deploy-pages@v4

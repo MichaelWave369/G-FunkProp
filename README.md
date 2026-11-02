@@ -2,6 +2,12 @@
 
 **An offline, MIT-licensed audio-responsive electric-propulsion simulator.** Inspired by a playful three-phase spaceship engine concept: acoustic resonance, piezoelectric transduction, and a gravitational "metric cap."
 
+## Browser demo (GitHub Pages)
+
+The flight deck can be published at **https://michaelwave369.github.io/G-FunkProp/** after GitHub Pages is enabled. Until a successful deployment, treat this as the expected address, not a confirmed live link. The simulator will continue to run offline from `index.html`.
+
+A dedicated [Pages workflow](.github/workflows/pages.yml) validates the model and deploys only `index.html`, `styles.css`, `core.js` and `app.js` from `main`. The workflow uses GitHub Actions, not Netlify. See [Pages launch instructions](docs/PAGES-LAUNCH.md) for the one-time repository setting and deployment checks.
+
 ## Launch
 
 Double-click `index.html`. No server, packages, accounts, build system, cloud connection or installation required. Chrome, Edge, and other modern Web Audio-capable browsers are recommended. Use the **ENGAGE THE GROOVE** button to start the original sub-bass tone (the browser requires a user gesture). Keep speaker volume low initially.

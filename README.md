@@ -46,11 +46,18 @@ The flight deck includes an offline **Frequency & Power Bench** below the oscill
 
 For assumptions, measurement boundaries, and repeatable test procedure, read [docs/EXPERIMENT-BENCH.md](docs/EXPERIMENT-BENCH.md). No audio files or experimental data are uploaded.
 
+## Rung 4: conservative live bass-frequency detection
+
+Live tone and local-file playback now share the same **windowed 6–120 Hz dominant-frequency estimator**, so out-of-band bass can be explicitly rejected instead of accidentally passing a broad low-pass RMS measurement. The UI reports dominant frequency and a confidence-based gate status. Analysis runs approximately 10 times per second on a 32,768-sample PCM window; short notes can be delayed.
+
+Synthetic regression tests check 12–88 Hz in-band tones, frequencies outside the gate, combined signals, and noise. They do **not** calibrate real-world speakers, browsers, or microphones. See [DSP verification and limitations](docs/DSP-VERIFICATION.md).
+
 ## Run model tests
 
 ```bash
 node tests/test-core.cjs
 node tests/test-bench.cjs
+node tests/test-dsp.cjs
 ```
 
 No dependencies needed beyond Node.js if you want to run the optional tests. The browser demo itself does not require Node.

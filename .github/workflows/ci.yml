@@ -1,0 +1,36 @@
+name: G-BIOS checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  model-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JS syntax
+        run: |
+          node --check app.js
+          node --check core.js
+          node --check tests/test-core.cjs
+      - name: Run model tests
+        run: node tests/test-core.cjs
+      - name: Validate offline entrypoint references
+        run: |
+          test -f index.html
+          test -f styles.css
+          test -f app.js
+          test -f core.js
+          if grep -nE 'https?://|src="//|href="//' index.html; then
+            echo 'Unexpected network reference in offline entrypoint'
+            exit 1
+          fi

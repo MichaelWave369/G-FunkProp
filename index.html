@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090b15" />
+  <meta name="description" content="G-BIOS v0.1: an offline audio-responsive electric propulsion simulator with a deliberately fictional warp mode." />
+  <title>G-BIOS | G-Funk Powered Propulsion</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <div class="brand"><span class="brand-symbol">Φ</span><div><b>PHI369 LABS</b><small>THE ENGINEERING EXPERIMENTS</small></div></div>
+      <span class="top-label">G-DRIVE SYSTEMS <span class="dot-separator">/</span> EXPERIMENT 001</span>
+      <span class="system-indicator"><span class="status-light" id="topStatusLight"></span><span id="topStatus">SYSTEM STANDBY</span></span>
+    </header>
+
+    <div class="intro">
+      <div><div class="eyebrow">SONIC CONTROL × ELECTRIC PROPULSION</div><h1>G-FUNK <span>POWERED</span><br />PROPULSION<span class="period">.</span></h1><p>A bassline becomes a flight-control signal. A simulated power bus supplies the energy. The groove sets the thrust.</p></div>
+      <div class="version-stamp"><span>G-BIOS</span><b>0.1.0</b><small>OFFLINE / MIT / ZERO DEPENDENCIES</small></div>
+    </div>
+
+    <div class="mode-switch" role="group" aria-label="Simulation mode">
+      <button id="engineeringBtn" class="mode-button selected" aria-pressed="true">01 <strong>ENGINEERING SIM</strong><small>Physics-bounded</small></button>
+      <button id="fictionBtn" class="mode-button" aria-pressed="false">02 <strong>METRIC WARP LORE</strong><small>Fictional visual model</small></button>
+      <div class="mode-note" id="modeNote">Real calculations. No claim of a real spacecraft engine.</div>
+    </div>
+
+    <main class="layout">
+      <div class="main-column">
+        <section class="panel display-panel">
+          <div class="panel-header"><div><span class="panel-index">01 / SYSTEM</span><h2>TRI-PHASIC CORE</h2></div><span class="panel-status" id="engineStatus">AWAITING SIGNAL</span></div>
+          <div class="engine-viewport"><canvas id="engineCanvas" aria-label="Animated visualization of the three simulated engine stages"></canvas><div class="viewport-tag">LIVE ENGINE VISUALIZATION <span>• NOT HARDWARE TELEMETRY</span></div></div>
+          <div class="stage-labels">
+            <div><span class="stage-dot stage-blue"></span><b>PHASE 01</b><strong>ACOUSTIC GATE</strong><small>12–88 Hz control input</small></div>
+            <div><span class="stage-dot stage-purple"></span><b>PHASE 02</b><strong>PIEZO LOOP</strong><small>Energy recovery model</small></div>
+            <div><span class="stage-dot stage-pink"></span><b>PHASE 03</b><strong id="phase3Name">ELECTRIC THRUSTER</strong><small id="phase3Note">Simulated reaction mass</small></div>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Simulation telemetry">
+          <div class="metric"><div class="metric-title">LOW-FREQ SIGNAL <span>12–88 HZ</span></div><div class="metric-main"><strong id="signalValue">0</strong><span>%</span></div><div class="meter-track"><div id="signalMeter" class="meter-fill"></div></div></div>
+          <div class="metric"><div class="metric-title">THRUST <span>ESTIMATED</span></div><div class="metric-main"><strong id="thrustValue">0.000</strong><span>N</span></div><div class="meter-track"><div id="thrustMeter" class="meter-fill purple"></div></div></div>
+          <div class="metric"><div class="metric-title">POWER DRAW <span>NET BUS</span></div><div class="metric-main"><strong id="powerValue">0.00</strong><span>kW</span></div><div class="meter-track"><div id="powerMeter" class="meter-fill pink"></div></div></div>
+          <div class="metric"><div class="metric-title">DELTA-V <span>INTEGRATED</span></div><div class="metric-main"><strong id="speedValue">0.0000</strong><span>m/s</span></div><div class="meter-track"><div id="speedMeter" class="meter-fill amber"></div></div></div>
+        </section>
+
+        <section class="panel wave-panel">
+          <div class="panel-header"><div><span class="panel-index">02 / INPUT</span><h2>SUB-BASS OSCILLOSCOPE</h2></div><span class="hz-readout" id="peakHz">FUNDAMENTAL: -- HZ</span></div>
+          <canvas id="waveCanvas" aria-label="Live low-frequency waveform"></canvas>
+          <div class="wave-foot"><span>ACOUSTIC SOURCE <b id="sourceLabel">G-FUNK OSCILLATOR</b></span><span>LISTENING BAND <b>12–88 HZ</b></span></div>
+        </section>
+      </div>
+
+      <aside class="side-column">
+        <section class="panel control-panel">
+          <div class="panel-header"><div><span class="panel-index">03 / OPERATOR</span><h2>DJ FLIGHT DECK</h2></div><span class="tiny-icon">◉ ◉ ◉</span></div>
+          <div class="source-switch" role="group" aria-label="Audio source"><button id="toneSourceBtn" class="source-button active">SYNTH TONE</button><button id="fileSourceBtn" class="source-button">AUDIO FILE</button></div>
+          <div id="filePickerBox" class="file-picker hidden"><label for="audioFile">Choose a local audio track</label><input type="file" id="audioFile" accept="audio/*" /><span id="fileName">No track loaded</span></div>
+          <div id="toneControls" class="control-group"><div class="control-line"><label for="freqSlider">BASS FREQUENCY</label><output id="freqOut">42 Hz</output></div><input id="freqSlider" type="range" min="12" max="88" value="42" step="1" /><div class="range-ends"><span>12 HZ</span><span>88 HZ</span></div></div>
+          <div class="control-group"><div class="control-line"><label for="powerSlider">SIMULATED BUS POWER</label><output id="busOut">25 kW</output></div><input id="powerSlider" type="range" min="1" max="50" value="25" step="1" /><div class="range-ends"><span>1 kW</span><span>50 kW</span></div></div>
+          <div class="control-group"><div class="control-line"><label for="sensitivitySlider">GROOVE RESPONSE</label><output id="sensitivityOut">100%</output></div><input id="sensitivitySlider" type="range" min="20" max="200" value="100" step="5" /><div class="range-ends"><span>SUBTLE</span><span>FULL BOUNCE</span></div></div>
+          <div class="control-group"><div class="control-line"><label for="volumeSlider">MONITOR VOLUME</label><output id="volumeOut">3%</output></div><input id="volumeSlider" type="range" min="0" max="20" value="3" step="1" /><div class="range-ends"><span>MUTED</span><span>LOW</span></div></div>
+          <div class="volume-warning">Start with your speakers low. Sub-bass may be inaudible on small speakers.</div>
+          <div class="actions"><button class="primary-action" id="playBtn">▶ <span>ENGAGE THE GROOVE</span></button><button class="danger-action" id="stopBtn">■ E-STOP</button></div>
+          <button id="resetBtn" class="reset-action">↻ RESET FLIGHT + THERMAL MODEL</button>
+          <p class="control-disclaimer" id="operatorMessage" role="status">Ready. Playback requires a click because browsers are not impressed by autonomous DJs.</p>
+        </section>
+
+        <section class="panel systems-panel">
+          <div class="panel-header"><div><span class="panel-index">04 / DIAGNOSTICS</span><h2>POWER & SAFETY</h2></div><span class="panel-status small" id="safetyLabel">NOMINAL</span></div>
+          <dl class="diagnostics"><div><dt>THERMAL MODEL</dt><dd id="tempValue">24.0 °C</dd></div><div><dt>PIEZO RECOVERY</dt><dd id="piezoValue">0 W</dd></div><div><dt>EXHAUST VELOCITY</dt><dd>20.0 km/s</dd></div><div><dt>PROPELLANT REMAINING</dt><dd id="fuelValue">100.000 kg</dd></div><div><dt>SIMULATION ELAPSED</dt><dd id="elapsedValue">00:00</dd></div><div><dt id="extraMetricLabel">JET KINETIC POWER</dt><dd id="extraMetricValue">0.00 kW</dd></div></dl>
+          <div class="safety-rule"><span id="safetyDot" class="safe-dot"></span><span id="safetyText">Thermal trip at 85 °C (illustrative)</span></div>
+        </section>
+      </aside>
+    </main>
+
+    <div class="science-strip"><span class="science-heading">KEEPING THE LEDGER HONEST</span><p id="scienceCopy"><b>Real physics:</b> Audio controls the duty cycle of an idealized electric thruster. Electrical power creates exhaust kinetic energy. Piezo recovery is a lossy subset of actuator power, never free energy.</p><span class="science-mark">ENERGY IN ≥ ENERGY OUT</span></div>
+    <footer><span>Φ369 LABS <span class="footer-divider">//</span> G-BIOS v0.1.0</span><span>OFFLINE-FIRST • OPEN SOURCE • NO REAL HARDWARE CONTROL</span><span>PEACE ABOVE DRAMA. LEDGER ABOVE EGO.</span></footer>
+  </div>
+  <script src="core.js"></script><script src="app.js"></script>
+</body>
+</html>

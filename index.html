@@ -51,6 +51,18 @@
           <canvas id="waveCanvas" aria-label="Live low-frequency waveform"></canvas>
           <div class="wave-foot"><span>ACOUSTIC SOURCE <b id="sourceLabel">G-FUNK OSCILLATOR</b></span><span>LISTENING BAND <b>12–88 HZ</b></span></div>
         </section>
+        <section class="panel bench-panel">
+          <div class="panel-header"><div><span class="panel-index">05 / EXPERIMENT</span><h2>FREQUENCY & POWER BENCH</h2></div><span class="panel-status small">SIMULATION ONLY</span></div>
+          <p class="bench-explain">Repeatable model sweeps, not a measured microphone response or spacecraft hardware test. The 12–88 Hz gate is modeled, not acoustically calibrated.</p>
+          <div class="bench-controls">
+            <label for="benchMode">EXPERIMENT</label>
+            <select id="benchMode"><option value="frequency">0–110 Hz / FREQUENCY GATE</option><option value="power">1–50 kW / BUS POWER</option><option value="signal">0–100% / BASS ENVELOPE</option></select>
+            <button type="button" id="benchRunBtn">RUN SWEEP</button>
+            <button type="button" id="benchExportBtn" disabled>EXPORT CSV</button>
+          </div>
+          <canvas id="benchCanvas" role="img" aria-label="Modeled thrust plotted against selected sweep variable"></canvas>
+          <p class="bench-summary" id="benchSummary" role="status">Choose an experiment and run the sweep. Results stay on this device.</p>
+        </section>
       </div>
 
       <aside class="side-column">
@@ -79,6 +91,6 @@
     <div class="science-strip"><span class="science-heading">KEEPING THE LEDGER HONEST</span><p id="scienceCopy"><b>Real physics:</b> Audio controls the duty cycle of an idealized electric thruster. Electrical power creates exhaust kinetic energy. Piezo recovery is a lossy subset of actuator power, never free energy.</p><span class="science-mark">ENERGY IN ≥ ENERGY OUT</span></div>
     <footer><span>Φ369 LABS <span class="footer-divider">//</span> G-BIOS v0.1.0</span><span>OFFLINE-FIRST • OPEN SOURCE • NO REAL HARDWARE CONTROL</span><span>PEACE ABOVE DRAMA. LEDGER ABOVE EGO.</span></footer>
   </div>
-  <script src="core.js"></script><script src="app.js"></script>
+  <script src="core.js"></script><script src="bench.js"></script><script src="app.js"></script>
 </body>
 </html>

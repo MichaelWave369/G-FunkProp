@@ -47,9 +47,9 @@
         </section>
 
         <section class="panel wave-panel">
-          <div class="panel-header"><div><span class="panel-index">02 / INPUT</span><h2>SUB-BASS OSCILLOSCOPE</h2></div><span class="hz-readout" id="peakHz">FUNDAMENTAL: -- HZ</span></div>
+          <div class="panel-header"><div><span class="panel-index">02 / INPUT</span><h2>SUB-BASS OSCILLOSCOPE</h2></div><span class="hz-readout" id="peakHz">DOMINANT: -- HZ</span></div>
           <canvas id="waveCanvas" aria-label="Live low-frequency waveform"></canvas>
-          <div class="wave-foot"><span>ACOUSTIC SOURCE <b id="sourceLabel">G-FUNK OSCILLATOR</b></span><span>LISTENING BAND <b>12–88 HZ</b></span></div>
+          <div class="wave-foot"><span>ACOUSTIC SOURCE <b id="sourceLabel">G-FUNK OSCILLATOR</b></span><span>LISTENING BAND <b>12–88 HZ</b></span><span>DSP STATUS <b id="dspStatus">IDLE</b></span></div>
         </section>
         <section class="panel bench-panel">
           <div class="panel-header"><div><span class="panel-index">05 / EXPERIMENT</span><h2>FREQUENCY & POWER BENCH</h2></div><span class="panel-status small">SIMULATION ONLY</span></div>
@@ -91,6 +91,6 @@
     <div class="science-strip"><span class="science-heading">KEEPING THE LEDGER HONEST</span><p id="scienceCopy"><b>Real physics:</b> Audio controls the duty cycle of an idealized electric thruster. Electrical power creates exhaust kinetic energy. Piezo recovery is a lossy subset of actuator power, never free energy.</p><span class="science-mark">ENERGY IN ≥ ENERGY OUT</span></div>
     <footer><span>Φ369 LABS <span class="footer-divider">//</span> G-BIOS v0.1.0</span><span>OFFLINE-FIRST • OPEN SOURCE • NO REAL HARDWARE CONTROL</span><span>PEACE ABOVE DRAMA. LEDGER ABOVE EGO.</span></footer>
   </div>
-  <script src="core.js"></script><script src="bench.js"></script><script src="app.js"></script>
+  <script src="core.js"></script><script src="bench.js"></script><script src="dsp.js"></script><script src="app.js"></script>
 </body>
 </html>

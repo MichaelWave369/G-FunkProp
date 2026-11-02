@@ -41,16 +41,19 @@ jobs:
       - name: Validate engineering model and source
         run: |
           node --check core.js
+          node --check bench.js
           node --check app.js
           node tests/test-core.cjs
+          node tests/test-bench.cjs
 
       - name: Stage only the public, dependency-free simulator
         run: |
           mkdir -p _site
-          cp index.html styles.css core.js app.js _site/
+          cp index.html styles.css core.js bench.js app.js _site/
           test -s _site/index.html
           test -s _site/styles.css
           test -s _site/core.js
+          test -s _site/bench.js
           test -s _site/app.js
           if grep -nE 'https?://|src="//|href="//' _site/index.html; then
             echo 'Unexpected network URL in the offline HTML entrypoint'

@@ -40,10 +40,17 @@ The bus always supplies the energy. Source playback does **not** propel anything
 
 **Energy ledger:** `P_thruster_available = P_bus - P_control - P_acoustic + P_piezo_recovered`. With `P_piezo_recovered <= P_acoustic`, the recovered energy never exceeds what was spent. The sound's amplitude governs duty cycle and cannot add net energy. The software intentionally makes no prediction about plasma resonator efficiencies, electrode voltages, sound-pressure levels, actual hardware temperatures, or warp geometry.
 
+## Rung 3: deterministic experiment bench
+
+The flight deck includes an offline **Frequency & Power Bench** below the oscilloscope. Run controlled sweeps over **0–110 Hz**, **1–50 kW** and **0–100% bass envelope**, plot modeled thrust, and export repeatable CSV results. This checks the *numerical model*, not a microphone's actual frequency response or a physical engine. The live Web Audio input path is **not yet calibrated**.
+
+For assumptions, measurement boundaries, and repeatable test procedure, read [docs/EXPERIMENT-BENCH.md](docs/EXPERIMENT-BENCH.md). No audio files or experimental data are uploaded.
+
 ## Run model tests
 
 ```bash
 node tests/test-core.cjs
+node tests/test-bench.cjs
 ```
 
 No dependencies needed beyond Node.js if you want to run the optional tests. The browser demo itself does not require Node.

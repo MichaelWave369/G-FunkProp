@@ -24,6 +24,7 @@
   let detectedHz = 0;
   let previousTime = 0;
   let currentCycle = core.computeCycle({active:false, powerW:25000, bassLevel:0, sensitivity:1, frequencyHz:42, tempC:24, propellantKg:100});
+  let lastSweep = null;
   let samples = new Float32Array(1024);
   let spect = new Uint8Array(1024);
   const stars = Array.from({length:70}, (_, i) => ({x: pseudo(i * 19 + 7), y:pseudo(i * 37 + 9),r:0.4+pseudo(i*13+3)*1.1}));
@@ -325,6 +326,80 @@
     ctx.stroke();ctx.shadowBlur=0;
   }
 
+  function drawBench() {
+    const canvas=$('benchCanvas');
+    if (!canvas || !lastSweep) return;
+    const ctx=canvas.getContext('2d');
+    const {w,h}=canvasSize(canvas,ctx);
+    ctx.clearRect(0,0,w,h);
+    const left=58,right=18,top=19,bottom=37;
+    const plotW=Math.max(1,w-left-right),plotH=Math.max(1,h-top-bottom);
+    const values=lastSweep.points;
+    const xMin=values[0].x,xMax=values[values.length-1].x;
+    const yPeak=Math.max(...values.map(p=>p.thrustN));
+    const yMax=Math.max(0.1,yPeak*1.15);
+    ctx.font='11px monospace';
+    ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){
+      const y=top+plotH*(i/4);
+      ctx.strokeStyle='rgba(122,165,193,.22)';
+      ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(left+plotW,y);ctx.stroke();
+      ctx.fillStyle='#a7c4d2';
+      ctx.textAlign='right';
+      ctx.fillText((yMax*(1-i/4)).toFixed(2),left-9,y+4);
+    }
+    for(let i=0;i<=5;i++){
+      const x=left+plotW*(i/5);
+      ctx.strokeStyle='rgba(122,165,193,.13)';
+      ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,top+plotH);ctx.stroke();
+      ctx.fillStyle='#a7c4d2';ctx.textAlign='center';
+      ctx.fillText((xMin+(xMax-xMin)*i/5).toFixed(0),x,top+plotH+17);
+    }
+    ctx.fillStyle='#adc4d9';ctx.textAlign='left';ctx.fillText('THRUST N',left,12);
+    ctx.textAlign='right';ctx.fillText(lastSweep.label+' ('+lastSweep.xUnit+')',w-right,h-5);
+    ctx.strokeStyle='#58dcf2';ctx.lineWidth=2.5;ctx.beginPath();
+    values.forEach((point,i)=>{
+      const x=left+(point.x-xMin)/(xMax-xMin)*plotW;
+      const y=top+plotH-point.thrustN/yMax*plotH;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    if(lastSweep.mode==='frequency'){
+      ctx.setLineDash([4,4]);ctx.strokeStyle='#c8a6f6';ctx.lineWidth=1;
+      for(const hz of [core.MIN_HZ,core.MAX_HZ]){
+        const x=left+(hz-xMin)/(xMax-xMin)*plotW;
+        ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,top+plotH);ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+  }
+
+  function runBench() {
+    const mode=$('benchMode').value;
+    try {
+      lastSweep=globalThis.GBIOSBench.createSweep(mode,{
+        powerW:getPower(),sensitivity:getSensitivity(),frequencyHz:getFreq(),bassLevel:0.75
+      });
+      const maxN=Math.max(...lastSweep.points.map(p=>p.thrustN));
+      $('benchSummary').textContent=lastSweep.points.length+' modeled points | peak '+maxN.toFixed(3)+' N | '+lastSweep.label+'. Values come from an illustrative electric-thruster formula, not measured engine performance.';
+      $('benchExportBtn').disabled=false;
+      drawBench();
+    } catch(error) {
+      lastSweep=null;$('benchExportBtn').disabled=true;
+      $('benchSummary').textContent='Bench error: '+(error && error.message ? error.message : String(error));
+    }
+  }
+
+  function exportBench() {
+    if(!lastSweep)return;
+    const data=globalThis.GBIOSBench.exportCSV(lastSweep);
+    const url=URL.createObjectURL(new Blob([data],{type:'text/csv;charset=utf-8'}));
+    const link=document.createElement('a');
+    link.href=url;link.download='gbios-'+lastSweep.mode+'-sweep.csv';
+    document.body.appendChild(link);link.click();link.remove();
+    window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
   function frame(time) {
     const dt=previousTime ? Math.min(.1,Math.max(0,(time-previousTime)/1000)) : 0;
     previousTime=time;
@@ -339,6 +414,9 @@
     window.requestAnimationFrame(frame);
   }
 
+  $('benchRunBtn').addEventListener('click',runBench);
+  $('benchExportBtn').addEventListener('click',exportBench);
+  window.addEventListener('resize',drawBench);
   $('engineeringBtn').addEventListener('click',()=>selectMode(false));
   $('fictionBtn').addEventListener('click',()=>selectMode(true));
   $('toneSourceBtn').addEventListener('click',()=>selectSource('tone'));

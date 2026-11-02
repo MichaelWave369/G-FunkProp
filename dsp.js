@@ -69,6 +69,9 @@
       const denominator=a-2*b+c;
       if(denominator < -1e-12) frequencyHz+=clamp(.5*(a-c)/denominator,-.5,.5);
     }
+    // Stabilize numerically exact integer tones (e.g., 88.00000025 Hz)
+    // without widening the physical 12–88 Hz model gate.
+    if (Math.abs(frequencyHz-Math.round(frequencyHz))<0.0001) frequencyHz=Math.round(frequencyHz);
     const confidence=clamp(strongest/(Math.SQRT2*rms),0,1);
     const inBand=frequencyHz>=MIN_HZ && frequencyHz<=MAX_HZ;
     const detected=inBand && confidence>=MIN_CONFIDENCE;
